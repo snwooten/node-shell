@@ -1,18 +1,24 @@
 var fs = require('fs');
+var request = require('request');
+
+function done(output) {
+  process.stdout.write(output);
+  process.stdout.write('\nprompt > ');
+}
+
 
   var commands = {
     pwd: function() {
       process.stdout.write('prompt > ');
       var pwd = process.env.PWD;
-      process.stdout.write(pwd);
+      done(pwd);
   },
     ls: function() {
       fs.readdir('.', function(err, files) {
       if (err) throw err;
       files.forEach(function(file) {
-      process.stdout.write(file.toString() + "\n");
+      done(file.toString() + "\n");
      })
-    process.stdout.write('prompt > ');
     });
 
     },
@@ -25,28 +31,38 @@ var fs = require('fs');
           arr[i] = process.env[act];
         }
       }
-      process.stdout.write(arr.join(' '));
+      done(arr.join(' '));
     },
     cat: function(fileName) {
       fs.readFile(fileName, function(err, data) {
         if (err) throw err;
-        process.stdout.write(data)
+        done(data)
       });
     },
     head: function(fileName) {
       fs.readFile(fileName, function(err, data) {
         if (err) throw err;
           var output = data.toString().substring(0).split('\n');
-          process.stdout.write(output.slice(0, 5).join('\n'));
+          done(output.slice(0, 5).join('\n'));
       });
     },
     tail: function (fileName) {
      fs.readFile(fileName, function(err, data) {
         if (err) throw err;
           var output = data.toString().substring(0).split('\n');
-          process.stdout.write(output.slice(output.length- 6, output.length - 1).join('\n'));
+          done(output.slice(output.length - 6, output.length - 1).join('\n'));
       });
     },
+    curl:  function (url) {
+      if (url.slice(0, 7) !== 'http://') url = 'http://' + url;
+      request(url, function(err, response, body) {
+        if (err) throw err;
+        else if (response && (response.statusCode > 399)) throw new Error(response.statusCode);
+        if (body){
+          done(body);
+        }
+      });
+    }
 }
 
 module.exports = commands;

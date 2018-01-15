@@ -25,8 +25,14 @@ process.stdin.on('data', function (data) {
     commands.head(str);
   } else if (action === 'tail') {
     commands.tail(str);
+  } else if (action === 'curl') {
+    commands.curl(str);
   }
-  process.stdout.write('\nprompt > ');
+  done(str);
 
 });
 
+function done(output) {
+  process.stdout.write(output);
+  process.stdout.write('\nprompt > ');
+}
